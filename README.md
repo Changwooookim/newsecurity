@@ -39,7 +39,7 @@ uvicorn main:app --host 0.0.0.0 --port 8000
 ```yaml
 sources:
   - name: "소스 이름"
-    tag: "KR"       # KR 또는 EN
+    category: "뉴스"   # 뉴스, 보안공지, 위협정보 등
     type: rss
     url: "https://example.com/rss"
 ```
@@ -48,7 +48,7 @@ sources:
 
 ```yaml
   - name: "소스 이름"
-    tag: "KR"
+    category: "보안공지"
     type: scraper
     url: "https://example.com/news"
     scraper_module: "scrapers.example_scraper"

@@ -1,0 +1,28 @@
+sources:
+  - name: "보안뉴스"
+    category: "뉴스"
+    type: rss
+    url: "http://www.boannews.com/media/news_rss.xml?skind=5"
+
+  - name: "KISA 보안공지"
+    category: "보안공지"
+    type: rss
+    url: "https://www.boho.or.kr/kr/rss.do?bbsId=B0000133"
+
+  - name: "Google Threat Intelligence"
+    category: "위협정보"
+    type: rss
+    url: "https://feeds.feedburner.com/threatintelligence/pvexyqv7v0v"
+
+#   - name: "CISA"
+#     category: "위협정보"
+#     type: rss
+#     url: "https://www.cisa.gov/cybersecurity-advisories/all.xml"
+#     filter_keyword: "Known Exploited"
+
+# RSS가 없는 소스는 아래와 같이 type: scraper로 추가 예정
+# - name: "예시 사이트"
+#   tag: "KR"
+#   type: scraper
+#   url: "https://example.com/security"
+#   scraper_module: "scrapers.example"   # scrapers/ 디렉토리 내 모듈명

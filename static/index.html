@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KorSecNews - 보안 뉴스 대시보드</title>
+  <meta name="description" content="국내외 주요 보안 공지 및 위협 인텔리전스를 한 곳에서 확인하세요." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" as="style" crossorigin
+    href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+  <style>
+    /* ── Design Tokens ──────────────────────────────────────────── */
+    :root {
+      --bg: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-header: rgba(255, 255, 255, 0.85);
+      --border: #e2e8f0;
+      --border-glow: #cbd5e1;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --text-dim: #64748b;
+      --accent: #2563eb;
+      --accent-dim: #1d4ed8;
+
+      --tag-color: #334155;
+      --tag-bg: #f1f5f9;
+      --tag-border: #cbd5e1;
+
+      --notice-tag: #b91c1c;
+      --notice-tag-bg: #fef2f2;
+      --notice-border: #fca5a5;
+      --notice-glow: rgba(239, 68, 68, 0.3);
+
+      --success: #16a34a;
+      --danger: #dc2626;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      --shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.1);
+      --transition: all .2s ease;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --bg-header: rgba(15, 23, 42, 0.85);
+      --border: #334155;
+      --border-glow: #475569;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --accent: #3b82f6;
+      --accent-dim: #60a5fa;
+
+      --tag-color: #cbd5e1;
+      --tag-bg: #334155;
+      --tag-border: #475569;
+
+      --notice-tag: #f87171;
+      --notice-tag-bg: #450a0a;
+      --notice-border: #991b1b;
+      --notice-glow: rgba(220, 38, 38, 0.4);
+
+      --shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      --shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    /* ── Reset ──────────────────────────────────────────────────── */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      font-size: 15px;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Pretendard', 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+      transition: background-color .3s ease, color .3s ease;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* ── Header ─────────────────────────────────────────────────── */
+    header {
+      background: var(--bg-header);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+      transition: background-color .3s ease, border-color .3s ease;
+    }
+
+    .header-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: .9rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      flex-shrink: 0;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #1e40af, #3b82f6);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    .logo-text {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -.5px;
+      background: linear-gradient(90deg, #1e40af, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .logo-sub {
+      font-size: .72rem;
+      color: var(--text-muted);
+      font-weight: 400;
+      -webkit-text-fill-color: var(--text-muted);
+    }
+
+    .header-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      font-size: .78rem;
+      color: var(--text-muted);
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: .4;
+      }
+    }
+
+    .theme-toggle {
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: var(--transition);
+    }
+
+    .theme-toggle:hover {
+      background: var(--bg);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .refresh-btn {
+      display: flex;
+      align-items: center;
+      gap: .45rem;
+      padding: .45rem 1rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: .82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .refresh-btn:hover {
+      background: var(--accent-dim);
+      transform: translateY(-1px);
+    }
+
+    .refresh-btn:active {
+      transform: translateY(0);
+    }
+
+    .refresh-btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .refresh-btn .spin {
+      animation: spin .9s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ── Stats bar ──────────────────────────────────────────────── */
+    .stats-bar {
+      max-width: 1400px;
+      margin: 1.2rem auto .3rem;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    #stats-container {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      font-size: .8rem;
+      color: var(--text-muted);
+    }
+
+    .stat-num {
+      font-weight: 700;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: .4rem;
+      margin-left: auto;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      padding: .3rem .75rem;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      font-size: .78rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .tab-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    /* ── Main grid ──────────────────────────────────────────────── */
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1rem 1.5rem 3rem;
+    }
+
+    #news-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+
+    @media (max-width: 1100px) {
+      #news-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 680px) {
+      #news-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ── News card ──────────────────────────────────────────────── */
+    .news-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.1rem 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: .6rem;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .news-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--card-accent, var(--accent));
+      opacity: 0.8;
+      transition: width .2s;
+    }
+
+    .news-card:hover {
+      border-color: var(--border-glow);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .news-card:hover::before {
+      width: 6px;
+    }
+
+    .news-card.card-notice {
+      border-color: var(--notice-border);
+      background: var(--notice-tag-bg);
+    }
+
+    [data-theme="light"] .news-card.card-notice {
+      background: #fffcfc;
+    }
+
+    .news-card.card-notice::before {
+      background: var(--notice-tag);
+      opacity: 1;
+    }
+
+    .news-card.card-notice:hover {
+      box-shadow: 0 10px 25px var(--notice-glow);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      flex-wrap: wrap;
+      margin-left: 6px;
+    }
+
+    .category-tag {
+      font-size: .7rem;
+      font-weight: 700;
+      padding: .2rem .6rem;
+      border-radius: 20px;
+      letter-spacing: .4px;
+      color: var(--card-accent);
+      background: var(--bg-card);
+      border: 1px solid var(--card-accent);
+      opacity: 0.9;
+    }
+
+    .category-tag.tag-notice {
+      color: #fff;
+      background: var(--card-accent);
+      border: 1px solid var(--card-accent);
+    }
+
+    .source-name {
+      font-size: .76rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .card-time {
+      font-size: .75rem;
+      color: var(--text-dim);
+      margin-left: auto;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .card-title {
+      font-size: .95rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.45;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-left: 6px;
+    }
+
+    .card-title a:hover {
+      color: var(--accent);
+    }
+
+    .card-summary {
+      font-size: .84rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-left: 6px;
+    }
+
+    .card-link {
+      display: inline-flex;
+      align-items: center;
+      gap: .3rem;
+      font-size: .8rem;
+      color: var(--accent);
+      margin-top: auto;
+      font-weight: 600;
+      width: fit-content;
+      margin-left: 6px;
+    }
+
+    .card-link:hover {
+      color: var(--accent-dim);
+    }
+
+    /* ── Loading / Empty states ─────────────────────────────────── */
+    .state-box {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 5rem 1rem;
+      color: var(--text-muted);
+    }
+
+    .state-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .loader {
+      width: 44px;
+      height: 44px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    /* ── Toast ──────────────────────────────────────────────────── */
+    #toast {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      padding: .7rem 1.2rem;
+      border-radius: var(--radius-sm);
+      font-size: .84rem;
+      font-weight: 500;
+      color: #fff;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: var(--transition);
+      pointer-events: none;
+      z-index: 999;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    #toast.success {
+      background: #166534;
+      border: 1px solid #22c55e;
+    }
+
+    #toast.error {
+      background: #7f1d1d;
+      border: 1px solid #ef4444;
+    }
+
+    #toast.info {
+      background: #1e3a5f;
+      border: 1px solid #3b82f6;
+    }
+
+    /* ── Footer ─────────────────────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: .75rem;
+      color: var(--text-dim);
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+
+<body data-theme="light">
+
+  <header>
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">🛡️</div>
+        <div>
+          <div class="logo-text">KorSecNews</div>
+          <div class="logo-sub">보안 뉴스 대시보드</div>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="status-badge" id="status-badge">
+          <div class="status-dot"></div>
+          <span id="last-updated">로딩 중…</span>
+        </div>
+        <button class="refresh-btn" id="refresh-btn" onclick="manualRefresh()">
+          <span id="refresh-icon">↻</span>
+          <span>갱신</span>
+        </button>
+        <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="테마 전환">
+          <span id="theme-icon">🌙</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="stats-bar">
+    <div id="stats-container">
+      <div class="stat-item">📅 오늘 전체 <span class="stat-num" id="stat-today">–</span>건</div>
+      <div class="stat-item">🚨 오늘 보안공지 <span class="stat-num" id="stat-notices">–</span>건</div>
+    </div>
+    <div class="filter-tabs" id="filter-tabs-container">
+      <button class="tab-btn active" id="tab-all" onclick="setFilter('all')">전체</button>
+    </div>
+  </div>
+
+  <main>
+    <div id="news-grid">
+      <div class="state-box">
+        <div class="loader"></div>
+        <p>뉴스를 불러오는 중입니다…</p>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    KorSecNews &nbsp;·&nbsp; 데이터는 1시간마다 자동 갱신됩니다 &nbsp;·&nbsp;
+    <span id="footer-count">–</span>건의 보안 소식 보관 중
+  </footer>
+
+  <div id="toast"></div>
+
+  <script>
+    let allNews = [];
+    let currentFilter = 'all';
+    const POLL_INTERVAL_MS = 5 * 60 * 1000;
+
+    const CATEGORY_COLORS = {
+      '뉴스': '#0ea5e9',
+      '보안공지': '#ef4444',
+      '위협정보': '#f59e0b',
+    };
+
+    function getCategoryColor(category) {
+      const cat = (category || '').trim();
+      return CATEGORY_COLORS[cat] || '#8b5cf6';
+    }
+
+    function formatDate(isoStr) {
+      if (!isoStr) return '–';
+      const d = new Date(isoStr);
+      if (isNaN(d)) return isoStr;
+      const now = new Date();
+      const diffMs = now - d;
+      const diffMin = Math.floor(diffMs / 60000);
+      if (diffMin < 1) return '방금 전';
+      if (diffMin < 60) return `${diffMin}분 전`;
+      const diffH = Math.floor(diffMin / 60);
+      if (diffH < 24 && d.getDate() === now.getDate()) return `${diffH}시간 전`;
+      return d.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' });
+    }
+
+    function renderCards(items) {
+      const grid = document.getElementById('news-grid');
+      if (!items.length) {
+        grid.innerHTML = `<div class="state-box"><div class="state-icon">🔍</div><h2>표시할 뉴스가 없습니다</h2></div>`;
+        return;
+      }
+
+      grid.innerHTML = items.map(item => {
+        const isNotice = item.category === '보안공지';
+        const tagClass = isNotice ? 'category-tag tag-notice' : 'category-tag';
+        const cardClass = isNotice ? 'news-card card-notice' : 'news-card';
+        const color = getCategoryColor(item.category);
+        const summary = item.summary ? `<p class="card-summary">${escHtml(item.summary)}</p>` : '';
+
+        return `
+      <article class="${cardClass}" style="--card-accent:${color}">
+        <div class="card-header">
+          <span class="${tagClass}">${escHtml(item.category || '기타')}</span>
+          <span class="source-name">${escHtml(item.source_name)}</span>
+          <span class="card-time">${formatDate(item.published_at)}</span>
+        </div>
+        <h2 class="card-title"><a href="${escHtml(item.url)}" target="_blank" rel="noopener">${escHtml(item.title)}</a></h2>
+        ${summary}
+        <a class="card-link" href="${escHtml(item.url)}" target="_blank" rel="noopener">원문 보기 ↗</a>
+      </article>`;
+      }).join('');
+    }
+
+    function escHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    function renderFilterTabs(categories) {
+      const container = document.getElementById('filter-tabs-container');
+      let html = `<button class="tab-btn ${currentFilter === 'all' ? 'active' : ''}" id="tab-all" onclick="setFilter('all')">전체</button>`;
+      categories.forEach(cat => {
+        const isActive = currentFilter === cat ? 'active' : '';
+        html += `<button class="tab-btn ${isActive}" id="tab-${cat}" onclick="setFilter('${cat}')">${escHtml(cat)}</button>`;
+      });
+      container.innerHTML = html;
+    }
+
+    function setFilter(cat) {
+      currentFilter = cat;
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById('tab-' + cat);
+      if (activeBtn) activeBtn.classList.add('active');
+      const filtered = cat === 'all' ? allNews : allNews.filter(n => n.category === cat);
+      renderCards(filtered);
+    }
+
+    function updateStats(items) {
+      const categories = [...new Set(items.map(n => n.category))].filter(Boolean).sort();
+      renderFilterTabs(categories);
+
+      const statsContainer = document.getElementById('stats-container');
+      const now = new Date();
+      const todayStr = now.toLocaleDateString('en-CA');
+      const todayItems = items.filter(n => n.published_at && new Date(n.published_at).toLocaleDateString('en-CA') === todayStr);
+      const todayNoticeCount = todayItems.filter(n => n.category === '보안공지').length;
+
+      statsContainer.innerHTML = `
+    <div class="stat-item">📅 오늘 전체 <span class="stat-num">${todayItems.length}</span>건</div>
+    <div class="stat-item">🚨 오늘 보안공지 <span class="stat-num">${todayNoticeCount}</span>건</div>
+  `;
+      document.getElementById('footer-count').textContent = items.length;
+    }
+
+    async function fetchNews(showToast = false) {
+      try {
+        const res = await fetch('/api/news?limit=500');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        allNews = data.items || [];
+        updateStats(allNews);
+        const filtered = currentFilter === 'all' ? allNews : allNews.filter(n => n.category === currentFilter);
+        renderCards(filtered);
+        const nowTime = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('last-updated').textContent = `마지막 갱신 ${nowTime}`;
+        if (showToast) showToastMsg(`${allNews.length}건 로드 완료`, 'success');
+      } catch (err) {
+        if (showToast) showToastMsg('뉴스 로드 실패', 'error');
+      }
+    }
+
+    async function manualRefresh() {
+      const btn = document.getElementById('refresh-btn');
+      const icon = document.getElementById('refresh-icon');
+      btn.disabled = true; icon.classList.add('spin');
+      showToastMsg('피드 갱신 중…', 'info');
+      try {
+        const res = await fetch('/api/refresh', { method: 'POST' });
+        const data = await res.json();
+        await fetchNews();
+        showToastMsg(`갱신 완료 — 새 항목 ${data.new_items}건`, 'success');
+      } catch (err) {
+        showToastMsg('갱신 실패', 'error');
+      } finally {
+        btn.disabled = false; icon.classList.remove('spin');
+      }
+    }
+
+    let toastTimer;
+    function showToastMsg(msg, type = 'info') {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.className = `show ${type}`;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+    }
+
+    /* ── Theme ─────────────────────────────────────────────────────── */
+    function initTheme() {
+      const saved = localStorage.getItem('theme') || 'light';
+      document.body.setAttribute('data-theme', saved);
+      updateThemeIcon(saved);
+    }
+
+    function toggleTheme() {
+      const current = document.body.getAttribute('data-theme');
+      const target = current === 'dark' ? 'light' : 'dark';
+      document.body.setAttribute('data-theme', target);
+      localStorage.setItem('theme', target);
+      updateThemeIcon(target);
+    }
+
+    function updateThemeIcon(theme) {
+      document.getElementById('theme-icon').textContent = theme === 'dark' ? '☀️' : '🌙';
+    }
+
+    initTheme();
+    fetchNews();
+    setInterval(() => fetchNews(), POLL_INTERVAL_MS);
+  </script>
+</body>
+
+</html>

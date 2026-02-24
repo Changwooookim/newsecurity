@@ -68,7 +68,7 @@ async def _fetch_rss(source: dict) -> list[dict]:
         async with httpx.AsyncClient(
             timeout=REQUEST_TIMEOUT,
             follow_redirects=True,
-            headers={"User-Agent": "KorSecNews/1.0 (+https://github.com/korsecnews)"},
+            headers={"User-Agent": "newsecurity/1.0 (+https://github.com/newsecurity)"},
         ) as client:
             response = await client.get(url)
             response.raise_for_status()

@@ -1,4 +1,4 @@
-# KorSecNews 🛡️
+# newsecurity 🛡️
 
 국내외 주요 보안 공지 및 위협 인텔리전스를 수집하여 하나의 대시보드에서 확인하는 웹 앱입니다.
 
@@ -7,7 +7,6 @@
 ### 1. 의존성 설치
 
 ```powershell
-cd d:\Security\korsecnews
 pip install -r requirements.txt
 ```
 
@@ -72,7 +71,7 @@ sources:
 ## 프로젝트 구조
 
 ```
-korsecnews/
+newsecurity/
 ├── main.py          # FastAPI 앱
 ├── feed_parser.py   # RSS 파서
 ├── database.py      # SQLite DB

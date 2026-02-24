@@ -1,5 +1,5 @@
 """
-main.py — KorSecNews FastAPI application
+main.py — newsecurity FastAPI application
 
 Endpoints:
   GET  /              → Serve the frontend dashboard (static/index.html)
@@ -50,7 +50,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="KorSecNews",
+    title="newsecurity",
     description="국내외 보안 뉴스 대시보드",
     version="0.1.0",
     lifespan=lifespan,

@@ -43,8 +43,12 @@ async def upsert_news_items(items: list[dict]) -> int:
     if not items:
         return 0
 
-    inserted = 0
     async with aiosqlite.connect(DB_PATH) as db:
+        # Get count before insertion
+        async with db.execute("SELECT COUNT(*) FROM news_items") as cur:
+            row = await cur.fetchone()
+            count_before = row[0] if row else 0
+
         for item in items:
             try:
                 await db.execute(
@@ -59,14 +63,17 @@ async def upsert_news_items(items: list[dict]) -> int:
                     """,
                     item,
                 )
-                inserted += 1  # In this context, we count processed items or strictly new ones? 
-                # Let's just return total processed/inserted for now.
-
             except Exception as exc:
                 logger.error(f"DB insert error for {item.get('url')}: {exc}")
+        
         await db.commit()
 
-    return inserted
+        # Get count after insertion
+        async with db.execute("SELECT COUNT(*) FROM news_items") as cur:
+            row = await cur.fetchone()
+            count_after = row[0] if row else 0
+
+    return count_after - count_before
 
 
 async def get_news(limit: int = 200, offset: int = 0) -> list[dict]:
